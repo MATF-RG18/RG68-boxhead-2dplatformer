@@ -42,7 +42,7 @@ static void on_keyboard(unsigned char key, int x, int y)
 {
     switch (key) {
     case 27:
-        /* Zavrsava se program. */
+        // Zavrsava se program.
         exit(0);
         break;
     }
@@ -50,7 +50,7 @@ static void on_keyboard(unsigned char key, int x, int y)
 
 static void on_reshape(int width, int height)
 {
-     /* Pamte se sirina i visina prozora. */
+     // Pamte se sirina i visina prozora.
     window_width = width;
     window_height = height;
 }
