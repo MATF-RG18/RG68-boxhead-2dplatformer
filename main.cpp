@@ -1,7 +1,9 @@
 #include <iostream>
 #include <stdlib.h>
 #include <GL/glut.h>
-
+#include <stdbool.h>
+#include <time.h>
+#include <math.h>
 
 using namespace std;
 
@@ -19,6 +21,7 @@ static void on_timer(int value);
 //promenljive koje cuvaju poziciju igraca
 float playerPosX = 0;
 float playerPosY = 0; 
+int playerCurrentTile;
 
 //kamera 
 float cameraTilt = true; //Da li je ili nije kamera malko nagnuta po x osi
@@ -30,8 +33,21 @@ float groundLevel = 0; //nivo terena, za sada je to 0 odnosno x osa
 
 float dnFPS = 90; //koristimo ga u on_timer pozivu za kontrolu frejmova po sekundi
 
-float indJump = false; //indikator da li je igrac trenutno u skoku
+bool indJump = false; //indikator da li je igrac trenutno u skoku
 float playerJumpHeight = 0.5; //Visina koju igrac moze da dosegne prilikom skoka
+
+
+// Nizovi za kontrolu zemlje po kojoj ce igrac hodati
+float* groundXCor; //X koordinate svake od ploca koje se nadovezuju
+float* groundHeight; //visina svake od ploca koje nadovezujemo
+bool*  groundIsSet; //indikator da li smo ili ne vec postavili visinu i x koordinatu ovog terena
+float  groundLengthOfTile = 0.5; // "duzina" ploce
+float  groundDepth = - 0.2;
+
+
+int groundNumOfTiles = 10; //Ove dve velicine koristimo za kontrolu realloc funkcije
+int groundReallocStep = 5; 
+
 
 
 int main(int argc, char **argv)
@@ -59,6 +75,23 @@ int main(int argc, char **argv)
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+
+    //Inicijalizujemo niz za ground
+    groundXCor = (float*)malloc( sizeof(float) * groundNumOfTiles);
+    groundHeight = (float*)malloc( sizeof(float) * groundNumOfTiles);
+    groundIsSet = (bool*)malloc( sizeof(bool) * groundNumOfTiles);
+    if(groundXCor == NULL || groundHeight == NULL || groundIsSet == NULL){
+        printf("greska pri alociranju memorije");
+        fflush(stdin);
+        exit(EXIT_FAILURE);
+    }    
+
+    int j;
+    for(j =0; j< groundNumOfTiles; j++)
+        groundIsSet[j] = false;
+
+
+
     //Glavna petlja
     glutMainLoop();
 
@@ -70,7 +103,9 @@ static void on_keyboard(unsigned char key, int x, int y)
     switch (key) {
     case 27:
         // Zavrsava se program.
-        exit(0);
+        free(groundXCor);
+        free(groundHeight);
+        exit(EXIT_SUCCESS);
         break;
     case 'd':
         //krecemo se na desnu stranu
@@ -149,28 +184,68 @@ static void on_display(void)
     // Skaliramo sve za koeficijent, po svim osama 
     glScalef(1, 1, 1);
 
-    //Crtam cajnik
-   glBegin(GL_POLYGON);
-     glVertex3f(playerPosX, playerPosY, 0);
-     glVertex3f(playerPosX + 0.1, playerPosY, 0);
-     glVertex3f(playerPosX + 0.1, playerPosY + 0.1, 0);
-     glVertex3f(playerPosX, playerPosY + 0.1, 0);  
-   glEnd();
+   //Podesavamo prvobitnu plocu, i poziciju igraca u odnosu na nju 
+   groundXCor[0] =  0;
+   groundHeight[0] = 0;
+   playerCurrentTile = 0;
+   groundIsSet[0] = true;   
 
-   //Ovo je samo prva podloga terena, sve ostale ce se dodavati nakon
-   glColor3f(1,1,0.8);
-   glBegin(GL_POLYGON);
-     glVertex3f(-1, 0, 0);
-     glVertex3f(-1, -1, 0);
-     glVertex3f(1 ,-1, 0);
-     glVertex3f(1, 0, 0);  
-   glEnd();
+   srand(time(NULL));
+   int i;
+   for(i= 1; i < groundNumOfTiles; i++)
+   {
+       if(groundIsSet[i] == false)
+      {
+       float visina;
+       visina = (float)rand()/(float)(RAND_MAX) * (groundIsSet[i-1] + 0.1);
+       groundHeight[i] = visina;
+       groundIsSet[i] = true;
+      }
+   }    
+   for(i = 0; i < groundNumOfTiles; i++) 
+   {
+
+   if(i == 0)
+       groundXCor[0] = 0;
+   else
+       groundXCor[i] = groundXCor[i-1] + groundLengthOfTile;
    
+   printf("\n%f",groundHeight[i]);
+   glColor3f(0,1,1);
+   glBegin(GL_POLYGON);
+     glVertex3f(groundXCor[i], groundHeight[i], 0);
+     glVertex3f(groundXCor[i], groundDepth, 0);
+     glVertex3f(groundXCor[i] + groundLengthOfTile,  groundDepth, 0);
+     glVertex3f(groundXCor[i] + groundLengthOfTile, groundHeight[i], 0);  
+   glEnd();
+   }
+    
+   glColor3f(1,0.5,1);
+   glBegin(GL_POLYGON);
+      glVertex3f(playerPosX, playerPosY, 0);
+      glVertex3f(playerPosX + 0.1, playerPosY, 0);
+      glVertex3f(playerPosX + 0.1, playerPosY + 0.1, 0);
+      glVertex3f(playerPosX, playerPosY + 0.1, 0);
+      glEnd();
+
    glutSwapBuffers();
 }
 
 static void on_timer(int value)
 {
+
+    //Racunamo trenutne dozvole igraca
+    playerCurrentTile = floor(playerPosX / groundLengthOfTile);
+  
+    if(groundIsSet[playerCurrentTile] == true)
+      groundLevel = groundHeight[playerCurrentTile];
+    else
+      {
+      printf("\nOvo je to: %d\t", playerCurrentTile);
+      exit(EXIT_FAILURE);
+      }
+
+
     //ovo se menja pritiskom na dugme c
     if(cameraTilt)
     {
@@ -190,10 +265,10 @@ static void on_timer(int value)
     //proveravamo da li je igrac trenutno u skoku
     if (indJump == true)
     {
-        if (playerPosY  < playerJumpHeight)
+        if (playerPosY  < playerJumpHeight + groundLevel)
             playerPosY += 0.01;
         //Ako je igrac dostigao max visinu skoka, kazemo da vise nije u skoku, pada.
-        else if(playerPosY >= playerJumpHeight)
+        else if(playerPosY >= groundLevel +  playerJumpHeight)
             indJump = false;
     }
     
@@ -209,7 +284,7 @@ static void on_timer(int value)
 
 }
 
-
+//Skok moram da namestim, i da namestim realloc da mi ne pravi samo 10 ploca, i plus ogranicenja, da ne mogu da ide kroz zid i tako to
 
 
 
