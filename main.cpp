@@ -7,6 +7,9 @@
 
 using namespace std;
 
+
+
+
 //promenljive koje pocinju sa 'dn' su user defined promenljive.  
 //Cuvamo dimenzije prozora kao width i height
 static int window_width, window_height; 
@@ -17,6 +20,11 @@ static void on_reshape(int width, int height);
 static void on_display(void);
 static void on_timer(int value);
 
+//Moje funkcije
+void updatePlayerJumpHeight();
+int getPlayerCurrentTile();
+void generateMoreGround();
+bool canMoveThisWay(unsigned char key);
 
 //promenljive koje cuvaju poziciju igraca
 float playerPosX = 0;
@@ -34,10 +42,12 @@ float groundLevel = 0; //nivo terena, za sada je to 0 odnosno x osa
 float dnFPS = 90; //koristimo ga u on_timer pozivu za kontrolu frejmova po sekundi
 
 bool indJump = false; //indikator da li je igrac trenutno u skoku
-float playerJumpHeight = 0.5; //Visina koju igrac moze da dosegne prilikom skoka
+bool indFalling = false;
 
+float playerJumpHeight; //Visina koju igrac moze da dosegne prilikom trenutnog skoka po y osi
+float playerMaxJumpHeight = 0.5; //Maksimalna visina skoka koju igrac moze da dosegne sa x ose (prirodna visina skoka)
 
-// Nizovi za kontrolu zemlje po kojoj ce igrac hodati
+//Nizovi za kontrolu zemlje po kojoj ce igrac hodati
 float* groundXCor; //X koordinate svake od ploca koje se nadovezuju
 float* groundHeight; //visina svake od ploca koje nadovezujemo
 bool*  groundIsSet; //indikator da li smo ili ne vec postavili visinu i x koordinatu ovog terena
@@ -74,6 +84,7 @@ int main(int argc, char **argv)
     glEnable(GL_LINE_SMOOTH);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    
 
 
     //Inicijalizujemo niz za ground
@@ -84,7 +95,10 @@ int main(int argc, char **argv)
         printf("greska pri alociranju memorije");
         fflush(stdin);
         exit(EXIT_FAILURE);
-    }    
+    }
+
+
+        
 
     int j;
     for(j =0; j< groundNumOfTiles; j++)
@@ -98,6 +112,7 @@ int main(int argc, char **argv)
     return 0;
 }
 
+
 static void on_keyboard(unsigned char key, int x, int y)
 {
     switch (key) {
@@ -109,16 +124,23 @@ static void on_keyboard(unsigned char key, int x, int y)
         break;
     case 'd':
         //krecemo se na desnu stranu
+        if(canMoveThisWay('d'))
         playerPosX += 0.02;
         break;
     case 'a':
-        //krecemo se na levu stranu
+        //krecemo se na levu stranu ako mozemo
+        if(canMoveThisWay('a'))
         playerPosX -= 0.02;
         break;
     case 'w':
+       
         //pokrecemo skok ako vec nije pokrenut
-        if( indJump == false)
+        if( indJump == false && indFalling == false)
+        {
+            updatePlayerJumpHeight();
+            printf("Podesena visina: %f\n", playerJumpHeight);
             indJump = true;
+        }
             break;
     case 'c':
           //biramo da li zelimo kamera da nam bude tilt ili ne.
@@ -155,9 +177,11 @@ static void on_display(void)
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();   
     //podesavamo gde ce nam kamera gledati, ondnosno iz koje pespektive
-    gluLookAt(playerPosX  + cameraOffsetX, cameraOffsetY, 3,playerPosX, 0, 0, 0, 1, 0);
+    gluLookAt(playerPosX  + cameraOffsetX, playerPosY + cameraOffsetY, 3,playerPosX , playerPosY, 0, 0, 1, 0);
+       srand(time(NULL));
     glColor3f(1,0,0);
     
+
     
     
     //KOORDINATNI SISTEM
@@ -210,7 +234,6 @@ static void on_display(void)
    else
        groundXCor[i] = groundXCor[i-1] + groundLengthOfTile;
    
-   printf("\n%f",groundHeight[i]);
    glColor3f(0,1,1);
    glBegin(GL_POLYGON);
      glVertex3f(groundXCor[i], groundHeight[i], 0);
@@ -232,7 +255,9 @@ static void on_display(void)
 }
 
 static void on_timer(int value)
-{
+{  
+    if(getPlayerCurrentTile() > (groundNumOfTiles / 2))
+        generateMoreGround();
 
     //Racunamo trenutne dozvole igraca
     playerCurrentTile = floor(playerPosX / groundLengthOfTile);
@@ -241,11 +266,10 @@ static void on_timer(int value)
       groundLevel = groundHeight[playerCurrentTile];
     else
       {
-      printf("\nOvo je to: %d\t", playerCurrentTile);
+      printf("\nGROUND LEVEL NOT SET TILE NO.: %d\t", playerCurrentTile);
       exit(EXIT_FAILURE);
       }
-
-
+    
     //ovo se menja pritiskom na dugme c
     if(cameraTilt)
     {
@@ -265,20 +289,30 @@ static void on_timer(int value)
     //proveravamo da li je igrac trenutno u skoku
     if (indJump == true)
     {
-        if (playerPosY  < playerJumpHeight + groundLevel)
+        if (playerPosY  < playerJumpHeight)
+        {
             playerPosY += 0.01;
+            cameraOffsetY += 0.01;
+        }
         //Ako je igrac dostigao max visinu skoka, kazemo da vise nije u skoku, pada.
-        else if(playerPosY >= groundLevel +  playerJumpHeight)
+        else if(playerPosY >=  playerJumpHeight)
+       {
             indJump = false;
+            indFalling = true;
+            printf("Falling! \n");
+       }    
     }
     
-    if(playerPosY > groundLevel && indJump == false)
+    if(playerPosY > groundHeight[playerCurrentTile] && indJump == false)
+    {
+        cameraOffsetY -= 0.01;
         playerPosY -= 0.01;
-
+    }
     if(playerPosY <= groundLevel && indJump == false)
+    {
         playerPosY = groundLevel;
-    
-
+        indFalling  = false;
+    }
     glutPostRedisplay(); //nanovo ucitavamo prozor u odredjenim intervalima
     glutTimerFunc(1000/dnFPS, on_timer, 0); //podesili smo funkciju on_timer da sama sebe poziva  
 
@@ -287,4 +321,98 @@ static void on_timer(int value)
 //Skok moram da namestim, i da namestim realloc da mi ne pravi samo 10 ploca, i plus ogranicenja, da ne mogu da ide kroz zid i tako to
 
 
+//definicije mojih funkcija
+void updatePlayerJumpHeight()
+{
+    //Nadjemo trenutnu podlogu po kojoj se igrac krece
+    playerCurrentTile = floor(playerPosX / groundLengthOfTile);
+    playerJumpHeight = playerMaxJumpHeight + groundHeight[playerCurrentTile];
+}
 
+//vraca trenutnu podlogu igraca
+int getPlayerCurrentTile()
+{
+    return floor(playerPosX / groundLengthOfTile);  
+}
+
+
+
+//Funkcija za generisanje terena
+void generateMoreGround()
+{
+   groundNumOfTiles += groundReallocStep;
+   groundIsSet = (bool*) realloc(groundIsSet, sizeof(bool) *  groundNumOfTiles);
+  //Niz sa koordinatam x naseg niza koji cuva podloge i niz koji cuva visine tih podloga
+   groundXCor = (float*) realloc(groundXCor, sizeof(float) * groundNumOfTiles);
+   groundHeight = (float*)  realloc(groundHeight, sizeof(float) * groundNumOfTiles);
+
+   if(groundIsSet == NULL || groundXCor == NULL || groundHeight == NULL)
+   {
+       fprintf(stderr, "losa realokacija u funkciji generateMoreGround");
+       exit(EXIT_FAILURE);
+   }
+
+   int i;
+
+   for(i=0; i< groundNumOfTiles; i++)
+       if(groundIsSet[i] != true)
+            groundIsSet[i] = false;
+
+   srand(time(NULL));
+   for(i= 1; i < groundNumOfTiles; i++)
+   {
+       if(groundIsSet[i] == false)
+      {
+       float visina;
+       visina = (float)rand()/(float)(RAND_MAX) * (groundIsSet[i-1] + 0.1);
+       groundHeight[i] = visina;
+       groundIsSet[i] = true;
+      }
+   }    
+   for(i = 0; i < groundNumOfTiles; i++) 
+   {
+
+   if(i == 0)
+       groundXCor[0] = 0;
+   else
+       groundXCor[i] = groundXCor[i-1] + groundLengthOfTile;
+   
+   glColor3f(0,1,1);
+   glBegin(GL_POLYGON);
+     glVertex3f(groundXCor[i], groundHeight[i], 0);
+     glVertex3f(groundXCor[i], groundDepth, 0);
+     glVertex3f(groundXCor[i] + groundLengthOfTile,  groundDepth, 0);
+     glVertex3f(groundXCor[i] + groundLengthOfTile, groundHeight[i], 0);  
+   glEnd();
+   }
+}
+
+
+//Funkcija kojom cemo proveravati da li mozemo da se krecemo u nekom pravcu ili ne
+bool canMoveThisWay(unsigned char key)
+{
+    
+    fflush(stdin);
+    playerCurrentTile = getPlayerCurrentTile();
+    //Mogao sam da stavim i if else konstrukciju ali je svejedno jer ce se svakako pozivati za jedno od ova dva i nije bitan redosled provere
+    if(key == 'a' || key == 'A')
+    {
+        printf("jeste");
+        //Ako guramo zid kada se krecemo na levo
+        if(groundXCor[playerCurrentTile - 1] + groundLengthOfTile == playerPosX)
+            return false;
+    }
+    if(key == 'd'|| key == 'D')
+    {
+       printf("oke");
+        //Ako guramo zid kada se krecemo na desno
+       if(groundXCor[playerCurrentTile] + groundLengthOfTile <= playerPosX + 0.1) //0.1 je magicna konstanta koja nam predstavlja sirinu nase kockice/igraca
+       {
+        printf("I didnt alow him to move this way!");
+        return false;
+       }
+    }
+
+    //Ako ni jedan uslov nije ispunjen mi mozemo da se krecemo u tom pravcu pa vracamo true
+    return true;
+}
