@@ -1,16 +1,21 @@
-PROGRAM = Projekat
-CC      = c++
-CFLAGS  = -g -ansi -Wall -I/usr/X11R6/include -I/usr/pkg/include
-LDFLAGS = -L/usr/X11R6/lib -L/usr/pkg/lib
-LDLIBS  = -lglut -lGLU -lGL
+PROGRAM = 2d_platformer
+CC      = gcc
+ZAST    = -g -ansi -std=c99 -Wall -L/usr/X11R6/lib -L/usr/pkg/lib
+PROG    = src/main.c src/utility.c src/callback.c
+ZAV     = src/utility.h src/callback.h
+BIBL    = -lglut -lGLU -lGL -lm
 
-$(PROGRAM): main.o
-	$(CC) $(LDFLAGS) -o $(PROGRAM) main.o $(LDLIBS)
+$(PROGRAM): $(PROG) $(ZAV)
+	$(CC) $(ZAST) -o $(PROGRAM) $(PROG) $(BIBL)
 
-.PHONY: clean dist
+.PHONY: run makerun clean
+
+run:
+	./$(PROGRAM) &
+
+makerun:
+	make
+	make run
 
 clean:
-	-rm *.o $(PROGRAM) *core
-
-dist: clean
-	-tar -chvj -C .. -f ../$(PROGRAM).tar.bz2 $(PROGRAM)
+	rm -f *~ src/*~ screenshots/*~
