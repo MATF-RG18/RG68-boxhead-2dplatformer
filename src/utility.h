@@ -8,7 +8,8 @@
 #include <time.h>
 #include <math.h>
 #include "callback.h"
-	
+#include "keyboard.h"
+#include "sharedVars.h"
 
 //Moje funkcije
 void updatePlayerJumpHeight();

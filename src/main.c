@@ -5,6 +5,7 @@
 #include <math.h>
 #include "callback.h"
 #include "utility.h"
+#include "sharedVars.h"
 
 
 int main(int argc, char **argv)
@@ -27,7 +28,7 @@ int main(int argc, char **argv)
     glEnable(GL_LINE_SMOOTH);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    
+   
 
     initGround();
     

@@ -8,16 +8,14 @@
 #include <time.h>
 #include <math.h>
 #include "utility.h"
+#include "sharedVars.h"
+#include "keyboard.h"
+#include "model.h"
+
 
 void set_callback(void);
 void on_timer(int value);
-void on_keyboard(unsigned char key, int x, int y);
 void on_reshape(int width, int height);
 void on_display(void);
-
-
-
-
-
 
 #endif

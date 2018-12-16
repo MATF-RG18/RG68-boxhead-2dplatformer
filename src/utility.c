@@ -1,42 +1,7 @@
 #include "utility.h"
+#include "sharedVars.h"
 #include <stdio.h>
-
-
-//EKSTERNE PROMENLJIVE
-
-
-//promenljive koje cuvaju poziciju igraca
- float playerPosX = 0;
- float playerPosY = 0; 
- int playerCurrentTile;
-
- //kamera 
- bool cameraTilt = true; //Da li je ili nije kamera malko nagnuta po x osi
-                         //pritiskom na 'c' resavamo da li hocemo ili necemo ovo. 
- float cameraOffsetX = 0.2;
- float cameraOffsetY = 1;
-
- float groundLevel = 0; //nivo terena, za sada je to 0 odnosno x osa
-
- float dnFPS = 90; //koristimo ga u on_timer pozivu za kontrolu frejmova po sekundi
-
- bool indJump = false; //indikator da li je igrac trenutno u skoku
- bool indFalling = false;
-
- float playerJumpHeight; //Visina koju igrac moze da dosegne prilikom trenutnog skoka po y osi
- float playerMaxJumpHeight = 0.5; //Maksimalna visina skoka koju igrac moze da dosegne sa x ose (prirodna visina skoka)
-
-//Nizovi za kontrolu zemlje po kojoj ce igrac hodati
- float* groundXCor; //X koordinate svake od ploca koje se nadovezuju
- float* groundHeight; //visina svake od ploca koje nadovezujemo
- bool*  groundIsSet; //indikator da li smo ili ne vec postavili visinu i x koordinatu ovog terena
- float  groundLengthOfTile = 0.5; // "duzina" ploce
- float  groundDepth = - 0.2;
-
-
- int groundNumOfTiles = 10; //Ove dve velicine koristimo za kontrolu realloc funkcije
- int groundReallocStep = 5; 
-
+#include "model.h"
 
 
 //FUNKCIJE
@@ -65,18 +30,45 @@ bool initGround()
 
 
 void updatePlayerJumpHeight()
-{
-    //Nadjemo trenutnu podlogu po kojoj se igrac krece
-    playerCurrentTile = floor(playerPosX / groundLengthOfTile);
-    playerJumpHeight = playerMaxJumpHeight + groundHeight[playerCurrentTile];
+{	
+	//pribavimo trenutnu podlogu
+	playerCurrentTile = getPlayerCurrentTile();
+    
+    //update-ujemo visinu skoka
+   	playerJumpHeight = playerMaxJumpHeight + groundHeight[playerCurrentTile];
 }
 
 //vraca trenutnu podlogu igraca
 int getPlayerCurrentTile()
 {
-    return floor(playerPosX / groundLengthOfTile);  
-}
+    int possibleLeft = floor(playerPosXLeft/ groundLengthOfTile);
+    int possibleRight = floor(playerPosXRight/ groundLengthOfTile);
 
+    //stvarno ne znam zasto sam dobio ovu ideju ali ovo radi
+    if(groundHeight[possibleLeft] > playerPosY && groundHeight[possibleRight] <= playerPosY)
+      return possibleRight;
+    //same here
+    if(groundHeight[possibleLeft] <= playerPosY && groundHeight[possibleRight] > playerPosY)
+      return possibleLeft;
+
+    //E ovo dole skroz ima smisla, ali ne radi bez ovoga gore
+    if(possibleRight == possibleLeft)
+      return possibleLeft;
+
+    else // possibleRight > possibleLeft
+    {
+      if(groundHeight[possibleLeft] < playerPosY && groundHeight[possibleRight] < playerPosY)
+        return groundHeight[possibleLeft] > groundHeight[possibleRight] ? possibleLeft : possibleRight;
+      
+      else if(groundHeight[possibleLeft] >= playerPosY && groundHeight[possibleRight] < playerPosY)
+        return possibleLeft;
+      
+      else
+        return possibleRight;
+    }
+
+    // return floor(playerPosXLeft/ groundLengthOfTile);  
+}
 
 
 //Funkcija za generisanje terena
@@ -96,7 +88,7 @@ void generateMoreGround()
 
    int i;
 
-   for(i=0; i< groundNumOfTiles; i++)
+   for(i=1; i< groundNumOfTiles; i++)
        if(groundIsSet[i] != true)
             groundIsSet[i] = false;
 
@@ -106,8 +98,9 @@ void generateMoreGround()
        if(groundIsSet[i] == false)
       {
        float visina;
-       visina = (float)rand()/(float)(RAND_MAX) * (groundIsSet[i-1] + 0.1);
-       groundHeight[i] = visina;
+       visina = (float)rand() / (float)RAND_MAX ;
+       groundHeight[i] = visina; //Dodatno skracivanje
+       
        groundIsSet[i] = true;
       }
    }    
@@ -133,28 +126,44 @@ void generateMoreGround()
 //Funkcija kojom cemo proveravati da li mozemo da se krecemo u nekom pravcu ili ne
 bool canMoveThisWay(unsigned char key)
 {
-    
     fflush(stdin);
     playerCurrentTile = getPlayerCurrentTile();
     //Mogao sam da stavim i if else konstrukciju ali je svejedno jer ce se svakako pozivati za jedno od ova dva i nije bitan redosled provere
-    if(key == 'a' || key == 'A')
-    {
-        printf("jeste");
+    if(key == 'a') //u switch statement sam stavio da podrzava i za veliko slovo tako da nije problem
+    {    
+
+        //Obezbedimo se kada smo na prvoj ploci da ne mozemo da odemo levo, imace smisla u daljoj implementaciji
+        if(playerCurrentTile == 0)
+          if(groundXCor[playerCurrentTile] >= playerPosXLeft)
+            return false;
+
+        //Ukoliko je visina na koju treba da skocimo manja od nekog dela visine naseg igraca onda necemo da skacemo, samo da predjemo preko toga
+        if(groundHeight[playerCurrentTile - 1] - playerPosY > 0 && 
+              groundHeight[playerCurrentTile - 1] - playerPosY < (playerLength / 2))
+          return true;
+
         //Ako guramo zid kada se krecemo na levo
-        if(groundXCor[playerCurrentTile - 1] + groundLengthOfTile == playerPosX)
+        if((groundXCor[playerCurrentTile - 1] + groundLengthOfTile >= playerPosXLeft - 0.005) &&
+           (groundHeight[playerCurrentTile - 1] > playerPosY))
             return false;
     }
-    if(key == 'd'|| key == 'D')
+    if(key == 'd')  //u switch statement sam stavio da podrzava i za veliko slovo tako da nije problem
     {
-       printf("oke");
-        //Ako guramo zid kada se krecemo na desno
-       if(groundXCor[playerCurrentTile] + groundLengthOfTile <= playerPosX + 0.1) //0.1 je magicna konstanta koja nam predstavlja sirinu nase kockice/igraca
+
+      
+        //Ukoliko je visina na koju treba da skocimo manja od nekog dela visine naseg igraca onda necemo da skacemo, samo da predjemo preko toga
+        if(groundHeight[playerCurrentTile + 1] - playerPosY > 0 && 
+              groundHeight[playerCurrentTile + 1] - playerPosY < (playerLength / 2))
+          return true;
+
+       //Ako guramo zid kada se krecemo na desno
+       if((groundXCor[playerCurrentTile] + groundLengthOfTile <= playerPosXLeft + 0.105) && //0.105 sam stavio da ne bi izlazilo malko preko granice
+             groundHeight[playerCurrentTile + 1] >= playerPosY) //0.1 je magicna konstanta koja nam predstavlja sirinu nase kockice/igraca
        {
-        printf("I didnt alow him to move this way!");
         return false;
        }
     }
 
-    //Ako ni jedan uslov nije ispunjen mi mozemo da se krecemo u tom pravcu pa vracamo true
+    // //Ako ni jedan uslov nije ispunjen mi mozemo da se krecemo u tom pravcu pa vracamo true
     return true;
 }
