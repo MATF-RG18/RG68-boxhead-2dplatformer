@@ -167,3 +167,105 @@ bool canMoveThisWay(unsigned char key)
     // //Ako ni jedan uslov nije ispunjen mi mozemo da se krecemo u tom pravcu pa vracamo true
     return true;
 }
+
+
+
+void setLighting()
+{	
+	//Podesavamo vektore
+	GLfloat position [] = {10,10,10,0};
+	GLfloat ambient  [] = {1,1,1,1};
+	GLfloat diffuse  [] = {1,1,1,1};
+	GLfloat specular [] = {1,1,1,1};
+
+	//Inicijalizujemo osobine svetlosti koje zelimo i poziciju osvetljenja
+	glLightfv(GL_LIGHT0, GL_POSITION, position);
+	glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse);
+	glLightfv(GL_LIGHT0, GL_SPECULAR, specular);
+
+
+
+}
+
+
+void setMaterial(char * option)
+{
+	
+
+    if(strcmp("ground", option))
+    {
+    	//Podesavamo vektore
+		GLfloat specular [] = {0,0,0,0};
+		GLfloat ambient  [] = {1,0,0,1};
+		GLfloat diffuse  [] = {1,0.4,0.4,1};
+    	int shininess   = 100;
+
+		//Inicijalizujemo osobine materijala
+		glMaterialfv(GL_FRONT, GL_AMBIENT, ambient);
+		glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse);
+		glMaterialfv(GL_FRONT, GL_SPECULAR, specular);
+		glMaterialf(GL_FRONT, GL_SHININESS, shininess);
+	}
+	else if(strcmp("player", option))
+	{
+		//Podesavamo vektore
+		GLfloat specular [] = {0,0,1,0};
+		GLfloat ambient  [] = {0,0,1,1};
+		GLfloat diffuse  [] = {0.4,0.4,1,1};
+	    int shininess   = 100;
+		
+		//Inicijalizujemo osobine materijala
+		glMaterialfv(GL_FRONT, GL_AMBIENT, ambient);
+		glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse);
+		glMaterialfv(GL_FRONT, GL_SPECULAR, specular);
+		glMaterialf(GL_FRONT, GL_SHININESS, shininess);	
+	}
+
+	else if(strcmp("stamina", option))
+	{
+			//Podesavamo vektore
+		GLfloat specular [] = {1,1,1,0};
+		GLfloat ambient  [] = {1,1,0,1};
+		GLfloat diffuse  [] = {0.4,0.4,1,1};
+	    int shininess   = 3;
+		
+		//Inicijalizujemo osobine materijala
+		glMaterialfv(GL_FRONT, GL_AMBIENT, ambient);
+		glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse);
+		glMaterialfv(GL_FRONT, GL_SPECULAR, specular);
+		glMaterialf(GL_FRONT, GL_SHININESS, shininess);	
+	}
+
+}
+
+
+
+
+void drawAxis(bool do_it)
+{
+	if(do_it)
+	{
+		//KOORDINATNI SISTEM
+    glLineWidth(0.5);
+    //x osa        
+    glColor3f(1,0,0);
+    glBegin(GL_LINES);
+        glVertex3f(-100, 0, 0);
+        glVertex3f(100, 0, 0);
+    glEnd();    
+    //y osa    
+    glColor3f(0,1,0);
+    glBegin(GL_LINES);
+        glVertex3f(0, -1000, 0);
+        glVertex3f(0, 1000, 0);
+    glEnd();    
+    //z osa    
+    glColor3f(0,0,1);
+    glBegin(GL_LINES);
+        glVertex3f(0, 0, -1000);
+        glVertex3f(0, 0, 1000);
+    glEnd();
+    }
+
+}

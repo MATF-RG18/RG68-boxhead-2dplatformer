@@ -25,10 +25,18 @@ int main(int argc, char **argv)
     glClearColor(0, 0, 0, 0);
     glEnable(GL_DEPTH_TEST);
     
+    //Enable blok
     glEnable(GL_LINE_SMOOTH);
     glEnable(GL_BLEND);
+    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT0);
+    glShadeModel(GL_SMOOTH);
+
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
    
+
+    setLighting();
+
 
     initGround();
     

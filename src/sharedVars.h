@@ -10,6 +10,9 @@
 extern float window_height; //visina
 extern float window_width; //sirina
 
+//Promenljiva koja ce mi govoriti da li sam u 3D prikazu ili 2D prikazu
+extern bool active3D;
+
 //promenljive koje cuvaju poziciju igraca
 extern float playerPosXLeft;
 extern float playerLength; //sirina kockice, kasnije modela
@@ -19,6 +22,14 @@ extern int playerCurrentTile;
 extern float playerStepForward;
 extern float playerStepBackwards;
 
+//da li smo aktivirali super skok
+extern bool wingsActive;
+extern float playerWingsYCor;
+
+//Energija naseg igraca
+extern int playerStamina;
+extern float staminaIncrement;
+ 
  //kamera 
 extern bool cameraTilt; //Da li je ili nije kamera malko nagnuta po x osi
                          //pritiskom na 'c' resavamo da li hocemo ili necemo ovo. 

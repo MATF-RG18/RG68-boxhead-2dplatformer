@@ -36,42 +36,43 @@ void on_display(void)
     glColor3f(1,0,0);
     
 
+    //koordinatni sistem, ako je false ne iscrtava se ako je true iscrtava se
+    drawAxis(false);
+
+    //stamina bar
+    drawStaminaBar();
     
-    
-    //KOORDINATNI SISTEM
-    glLineWidth(0.5);
-    //x osa        
-    glColor3f(1,0,0);
-    glBegin(GL_LINES);
-        glVertex3f(-100, 0, 0);
-        glVertex3f(100, 0, 0);
-    glEnd();    
-    //y osa    
-    glColor3f(0,1,0);
-    glBegin(GL_LINES);
-        glVertex3f(0, -1000, 0);
-        glVertex3f(0, 1000, 0);
-    glEnd();    
-    //z osa    
-    glColor3f(0,0,1);
-    glBegin(GL_LINES);
-        glVertex3f(0, 0, -1000);
-        glVertex3f(0, 0, 1000);
-    glEnd();
-    
-    // Skaliramo sve za koeficijent, po svim osama 
+    // Skaliramo sve za koeficijent, po svim osama, u ovom slucaju ne skaliramo, ali ipak cu ostaviti da mi bude lakse kasnije da ne razmisjljam
     glScalef(1, 1, 1);
 
-    //Iscrtavamo teren u 2d
-    drawGround2D();
+
+
+
+    //Racunamo koordinatu desne ivice naseg igraca. Korisno kasnije u kolizijama
+   	playerPosXRight = playerPosXLeft + playerLength; // cuvamo srazmeru igraca 
+
+
+	if(active3D)
+    {
+    	//Iscrtavamo u 3D naseg igraca i ground
+    	drawGround3D();
+    	drawPlayerModel3D((float)((playerPosXLeft + playerPosXRight) / 2), playerPosY);
+    }
+    else
+    {
+    	//Iscrtavamo u 2D naseg igraca i ground
+    	drawGround2D();
+   		drawPlayerModel2D();
+    }
+   
 
 
 
    //Iscrtavamo igraca
    playerPosXRight = playerPosXLeft + playerLength; // cuvamo srazmeru igraca 
 
-   drawPlayerModel2D();
-   // drawPlayerModel3D();
+   //drawPlayerModel2D();
+    
 
    glutSwapBuffers();
 }
@@ -81,7 +82,43 @@ void on_display(void)
 
 void on_timer(int value)
 {  
-    
+	
+	if(!wingsActive)
+	{
+		if(playerStamina < 100)
+		{
+			if(playerStamina < 30)
+			{
+		    	staminaIncrement += 0.2;
+			}
+			else if(playerStamina > 70)
+			{
+				staminaIncrement += 0.3;
+			}
+			else
+				staminaIncrement += 0.25;
+
+		    if(staminaIncrement >= 1)
+		    {
+				playerStamina += 1;
+				staminaIncrement = 0;
+			}	
+		}
+	}
+	else
+	{
+		//Deaktiviramo krila ukoliko je stamina = 0;
+		if(playerStamina <= 0)
+			wingsActive = false;
+
+		staminaIncrement -= 0.3;
+		if(staminaIncrement <= 0)
+		{
+			playerStamina -= 1;
+			staminaIncrement = 1;
+		}
+	}	
+
      if(getPlayerCurrentTile() > (groundNumOfTiles / 2))
         generateMoreGround();
 
@@ -99,52 +136,65 @@ void on_timer(int value)
     //ovo se menja pritiskom na dugme c
     if(cameraTilt)
     {
-        if(cameraOffsetX < 0.2)
-            cameraOffsetX += 0.02;
+    	if(!active3D)
+    		active3D = true;
+
         if(cameraOffsetY < 1)
-            cameraOffsetY += 0.2;
+            cameraOffsetY += 0.02;
     }
     else
     {
+    	if(active3D)
+   			if(cameraOffsetY <=0 )
+	   			active3D = false;
+
         if(cameraOffsetX > 0)
             cameraOffsetX -= 0.02;
         if(cameraOffsetY > 0)
             cameraOffsetY -= 0.02;
+        if(cameraOffsetY < 0)
+        	cameraOffsetY = 0;
     }   
    
     //proveravamo da li je igrac trenutno u skoku
     
-    if(playerPosY > groundHeight[getPlayerCurrentTile()])
-        if(indFalling == false)
-           indFalling = true;
-       
-  
+    if(!wingsActive)
+    {
+		    if(playerPosY > groundHeight[getPlayerCurrentTile()])
+		        if(indFalling == false)
+		           indFalling = true;
+		       
+		  
 
-    if (indJump == true)
-    {
-        if (playerPosY  < playerJumpHeight)
-        {
-            playerPosY += 0.01;
-            cameraOffsetY += 0.01;
-        }
-        //Ako je igrac dostigao max visinu skoka, kazemo da vise nije u skoku, pada.
-        else if(playerPosY >=  playerJumpHeight)
-       {
-            indJump = false;
-            indFalling = true;
-       }    
-    }
-    
-    if(playerPosY > groundHeight[playerCurrentTile] && indJump == false)
-    {
-        cameraOffsetY -= 0.01;
-        playerPosY -= 0.01;
-    }
-    if(playerPosY <= groundHeight[playerCurrentTile] && indJump == false)
-    {
-        playerPosY = groundLevel;
-        indFalling  = false;
-    }
+		    if (indJump == true)
+		    {
+		        if (playerPosY  < playerJumpHeight)
+		        {
+		            playerPosY += 0.01;
+		            cameraOffsetY += 0.01;
+		        }
+		        //Ako je igrac dostigao max visinu skoka, kazemo da vise nije u skoku, pada.
+		        else if(playerPosY >=  playerJumpHeight)
+		       {
+		            indJump = false;
+		            indFalling = true;
+		       }    
+		    }
+		    
+		    if(playerPosY > groundHeight[playerCurrentTile] && indJump == false)
+		    {
+		        cameraOffsetY -= 0.01;
+		        playerPosY -= 0.01;
+		    }
+		    if(playerPosY <= groundHeight[playerCurrentTile] && indJump == false)
+		    {
+		        playerPosY = groundLevel;
+		        indFalling  = false;
+		    }
+	}
+	
+
+
     glutPostRedisplay(); //nanovo ucitavamo prozor u odredjenim intervalima
     glutTimerFunc(1000/dnFPS, on_timer, 0); //podesili smo funkciju on_timer da sama sebe poziva  
 

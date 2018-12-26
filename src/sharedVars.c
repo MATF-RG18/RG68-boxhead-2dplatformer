@@ -8,6 +8,15 @@
 float window_height; //visina
 float window_width; //sirina
 
+//Da li smo aktivirali super skok
+bool wingsActive= false;
+
+
+//Energija naseg igraca, 100 je maksimalna vrednost
+int playerStamina = 100;
+float staminaIncrement = 0;
+
+
 //promenljive koje cuvaju poziciju igraca
  float playerPosXLeft = 0;
  float playerLength = 0.1; //sirina kockice, kasnije modela
@@ -17,6 +26,9 @@ float window_width; //sirina
  float playerStepBackwards = -0.025;
  float playerStepForward = 0.025;
 
+ //promenljiva koja ce mi reci da li sam u 3D prikazu ili 2D prikazu
+ bool active3D = true;
+
  //kamera 
  bool cameraTilt = true; //Da li je ili nije kamera malko nagnuta po x osi
                          //pritiskom na 'c' resavamo da li hocemo ili necemo ovo. 
@@ -25,7 +37,7 @@ float window_width; //sirina
 
  float groundLevel = 0; //nivo terena, za sada je to 0 odnosno x osa
 
- float dnFPS = 90; //koristimo ga u on_timer pozivu za kontrolu frejmova po sekundi
+ float dnFPS = 1000; //koristimo ga u on_timer pozivu za kontrolu frejmova po sekundi
 
  bool indJump = false; //indikator da li je igrac trenutno u skoku
  bool indFalling = false;

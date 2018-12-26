@@ -2,6 +2,13 @@
 #include "utility.h"
 #include "sharedVars.h"
 
+//predefinisane promenljive za dirke na tastaturi
+#define ESCAPE 27
+#define SPACE 32
+
+// definisemo promenljivu koja ce nam cuvati energiju naseg igraca
+#define FULL 100
+
 
 void setKeyboardFunc(void)
 {
@@ -12,7 +19,7 @@ void setKeyboardFunc(void)
 void on_keyboard(unsigned char key, int x, int y)
 {
     switch (key) {
-    case 27:
+    case ESCAPE:
         // Zavrsava se program.
         free(groundXCor);
         free(groundHeight);
@@ -31,25 +38,68 @@ void on_keyboard(unsigned char key, int x, int y)
             playerPosXLeft += playerStepBackwards;
         break;
     case 'w':
-       
+    case 'W':  
         //pokrecemo skok ako vec nije pokrenut
-        if( indJump == false && indFalling == false)
+        if(!wingsActive)
+       {
+	        if( indJump == false && indFalling == false)
+	        {
+		        	if(playerStamina >= 30)
+		        {
+		        	playerStamina -= 30;
+		            updatePlayerJumpHeight();
+		            indJump = true;
+		        }
+		    }
+	    }
+        
+        else
         {
-            updatePlayerJumpHeight();
-            indJump = true;
+        	playerPosY += playerStepForward; //za sada koristim ovo ali svejedno je ime promenljive bitno je da je okej velicina :TODO
         }
-            break;
-    case 'c':
-          //biramo da li zelimo kamera da nam bude tilt ili ne.
-          if( cameraTilt == true){
-              cameraTilt = false;}
-          else
-              cameraTilt = true;
+        break;
+    
+
+    case 's':
+    case 'S':
+    	if(wingsActive)
+    	{
+    		if(playerPosY - playerStepForward >= groundHeight[getPlayerCurrentTile()])
+    		playerPosY -= playerStepForward;
+    	}
+    	break;
+    // case 'c':
+    // case 'C':
+    //       //biramo da li zelimo kamera da nam bude tilt ili ne.
+    //       if( cameraTilt == true){
+    //           cameraTilt = false;}
+    //       else
+    //           cameraTilt = true;
+    //       break; 
+    case 'r':
+    case 'R':
+    	  //biramo da li zelimo 3D ili 2D
+          if( cameraTilt == true)
+          {
+              cameraTilt = false;
+    	  }
+    	  else
+    	  {
+            cameraTilt = true;
+          }
           break; 
-    case 'p': //debag funkcija
-          printf("Current tile: %d\n CurrentPosXLeft: %f\n Right x coordinate of previous tile: %f\n\n"
-                        ,getPlayerCurrentTile(), playerPosXLeft, groundXCor[getPlayerCurrentTile()-1] + groundLengthOfTile);
-          break;
+     
+     case SPACE:
+     	   if(!wingsActive &&(playerStamina >= 30))
+     	   {	
+     	   		playerStamina -= 20;
+     	    	wingsActive = true;
+    	   }
+    	   else if(wingsActive)
+    	   {
+    	   	 indFalling = true;
+    	   	 wingsActive = false;
+    	   }
     }
 }
 
