@@ -94,6 +94,8 @@ void on_keyboard(unsigned char key, int x, int y)
         else
         {
           pressed_a = pressed_d = false;
+          indJump = false;
+          indFalling = true;
         }
       }
       break;
