@@ -5,6 +5,9 @@ Predlog: Najbolje je proveriti sta se desava pritiskom na taster <kbd>F</kbd> pr
 
 Cilj: Dobiti sto vise poena (nema kraja igre) i pobeci od crvene kocke. 
 
+
+Tipka | Događaj
+----- | ------
 <kbd>W</kbd> | Skok ili kretanje na gore u zavisnosti od toga da li je redom iskljucen ili ukljucen rezim letenja 
 <kbd>D</kbd> | Kretanje na desnu stranu
 <kbd>A</kbd> | Kretanje na levu stranu
