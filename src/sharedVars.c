@@ -18,13 +18,19 @@ float staminaIncrement = 0;
 
 
 //promenljive koje cuvaju poziciju igraca
- float playerPosXLeft = 0;
+ float playerPosXLeft = 1.25;
  float playerLength = 0.1; //sirina kockice, kasnije modela
  float playerPosXRight;
  float playerPosY = 0; 
  int playerCurrentTile;
- float playerStepBackwards = -0.025;
- float playerStepForward = 0.025;
+ float playerStepBackwards = -0.020;
+ float playerStepForward = 0.020;
+
+ //Parametar za x osu crvene ravni
+ float RedPlaneParam = 1.1;
+
+ //animation parametar
+ bool animation_ongoing = true;
 
  //promenljiva koja ce mi reci da li sam u 3D prikazu ili 2D prikazu
  bool active3D = true;
@@ -50,8 +56,14 @@ float staminaIncrement = 0;
  float* groundHeight; //visina svake od ploca koje nadovezujemo
  bool*  groundIsSet; //indikator da li smo ili ne vec postavili visinu i x koordinatu ovog terena
  float  groundLengthOfTile = 0.5; // "duzina" ploce
- float  groundDepth = - 0.2;
+ float  groundDepth = - 3;
 
 
  int groundNumOfTiles = 20; //Ove dve velicine koristimo za kontrolu realloc funkcije
  int groundReallocStep = 5; 
+ 
+
+ //bool promenljive za kretanje
+ bool pressed_a = false;
+ bool pressed_d = false;
+

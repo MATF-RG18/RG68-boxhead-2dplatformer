@@ -2,7 +2,7 @@
 #include "sharedVars.h"
 #include "model.h"
 
-
+#define FULL 100;
 
 void set_callback(void)
 {
@@ -51,19 +51,17 @@ void on_display(void)
     //Racunamo koordinatu desne ivice naseg igraca. Korisno kasnije u kolizijama
    	playerPosXRight = playerPosXLeft + playerLength; // cuvamo srazmeru igraca 
 
+   	
+   	//Iscrtavamo igraca
+   	drawPlayerModel((float)((playerPosXLeft + playerPosXRight) / 2), playerPosY);
 
 	if(active3D)
-    {
-    	//Iscrtavamo u 3D naseg igraca i ground
+    	//Iscrtavamo u 3D ground
     	drawGround3D();
-    	drawPlayerModel3D((float)((playerPosXLeft + playerPosXRight) / 2), playerPosY);
-    }
+    
     else
-    {
-    	//Iscrtavamo u 2D naseg igraca i ground
+    	//Iscrtavamo u 2D ground
     	drawGround2D();
-   		drawPlayerModel2D();
-    }
    
 
 
@@ -82,7 +80,44 @@ void on_display(void)
 
 void on_timer(int value)
 {  
-	
+
+  //Racunamo trenutne dozvole igraca
+    playerCurrentTile = getPlayerCurrentTile(); 
+
+  //Popravlja jedan deo bug-a da mi pola kockice igraca bude u zidu.
+  if((playerPosXRight >= groundXCor[playerCurrentTile] + groundLengthOfTile) && 
+      abs(groundHeight[playerCurrentTile + 1] - groundHeight[playerCurrentTile]) > playerLength/3)
+   {
+      playerPosXLeft = groundXCor[playerCurrentTile] + groundLengthOfTile - playerLength;
+   }
+
+  //Popravlja drugi deo bug-a;
+  if(playerPosXLeft > (groundXCor[playerCurrentTile] + groundLengthOfTile) && playerPosY < groundHeight[playerCurrentTile+1])
+    playerPosXLeft = groundXCor[playerCurrentTile] + groundLengthOfTile - playerLength;  
+
+  
+
+  if(playerCurrentTile % 25 == 0 && playerPosY <= groundHeight[playerCurrentTile])
+    playerStamina = FULL;
+
+
+  if(animation_ongoing)
+  {
+
+  //Prekida se igra
+  if(playerPosXRight <= RedPlaneParam)
+  {
+    animation_ongoing = false;
+  }
+
+  if(playerCurrentTile >= 3)
+  {
+      if(playerCurrentTile < 30)
+        RedPlaneParam+=0.008;
+      else if(playerCurrentTile < 60)
+        RedPlaneParam+= 0.01;
+  }
+
 	if(!wingsActive)
 	{
 		if(playerStamina < 100)
@@ -119,12 +154,19 @@ void on_timer(int value)
 		}
 	}	
 
-     if(getPlayerCurrentTile() > (groundNumOfTiles / 2))
-        generateMoreGround();
 
-    //Racunamo trenutne dozvole igraca
-    playerCurrentTile = getPlayerCurrentTile(); 
-  
+    
+  	 if(playerCurrentTile > (groundNumOfTiles / 2))
+        generateMoreGround();
+    
+     if(groundXCor[playerCurrentTile] + groundLengthOfTile < playerPosXRight 
+     		&& playerPosY < groundHeight[playerCurrentTile+1]
+     			&& abs(groundXCor[playerCurrentTile+1] - groundXCor[playerCurrentTile]) > playerLength/2)
+     {
+     	playerPosXRight = groundXCor[playerCurrentTile] + groundLengthOfTile;
+     	playerPosXLeft = playerPosXRight - playerLength;
+     }
+
     if(groundIsSet[playerCurrentTile] == true)
       groundLevel = groundHeight[playerCurrentTile];
     else
@@ -168,10 +210,25 @@ void on_timer(int value)
 
 		    if (indJump == true)
 		    {
+
+            if(pressed_a)
+            {
+               //Ako drzimo i 'w' i 'a' zelimo da nam se krece dijagonalno
+             if(canMoveThisWay('a')) 
+                  playerPosXLeft += playerStepBackwards;
+            }
+            else if(pressed_d)
+            {
+               //Ako drzimo i 'w' i 'd' zelimo da nam se krece dijagonalno
+              if(canMoveThisWay('d'))
+                  playerPosXLeft += playerStepForward;
+                //za sada koristim ovo ali svejedno je ime promenljive bitno je da je okej velicina :TODO   
+            }
+
 		        if (playerPosY  < playerJumpHeight)
 		        {
-		            playerPosY += 0.01;
-		            cameraOffsetY += 0.01;
+		            playerPosY += 0.02;
+		            cameraOffsetY += 0.02;
 		        }
 		        //Ako je igrac dostigao max visinu skoka, kazemo da vise nije u skoku, pada.
 		        else if(playerPosY >=  playerJumpHeight)
@@ -183,8 +240,21 @@ void on_timer(int value)
 		    
 		    if(playerPosY > groundHeight[playerCurrentTile] && indJump == false)
 		    {
-		        cameraOffsetY -= 0.01;
-		        playerPosY -= 0.01;
+            if(pressed_a)
+            {
+               //Ako drzimo i 'w' i 'a' zelimo da nam se krece dijagonalno
+             if(canMoveThisWay('a')) 
+                  playerPosXLeft += playerStepBackwards;
+            }
+            else if(pressed_d)
+            {
+               //Ako drzimo i 'w' i 'd' zelimo da nam se krece dijagonalno
+              if(canMoveThisWay('d'))
+                  playerPosXLeft += playerStepForward;
+                //za sada koristim ovo ali svejedno je ime promenljive bitno je da je okej velicina :TODO   
+            }
+		        cameraOffsetY -= 0.02;
+		        playerPosY -= 0.02;
 		    }
 		    if(playerPosY <= groundHeight[playerCurrentTile] && indJump == false)
 		    {
@@ -197,7 +267,7 @@ void on_timer(int value)
 
     glutPostRedisplay(); //nanovo ucitavamo prozor u odredjenim intervalima
     glutTimerFunc(1000/dnFPS, on_timer, 0); //podesili smo funkciju on_timer da sama sebe poziva  
-
+  }
 }
 
 

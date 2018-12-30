@@ -22,9 +22,14 @@ extern int playerCurrentTile;
 extern float playerStepForward;
 extern float playerStepBackwards;
 
+//animation parametar
+extern bool animation_ongoing;
+
 //da li smo aktivirali super skok
 extern bool wingsActive;
-extern float playerWingsYCor;
+	
+//Parametar za x osu crvene ravni
+extern float RedPlaneParam;
 
 //Energija naseg igraca
 extern int playerStamina;
@@ -56,5 +61,9 @@ extern float  groundDepth;
 
 extern int groundNumOfTiles; //Ove dve velicine koristimo za kontrolu realloc funkcije
 extern int groundReallocStep; 
+
+//bool promenljive za kretanje
+extern bool pressed_a;
+extern bool pressed_d;
 
 #endif

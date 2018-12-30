@@ -23,13 +23,18 @@ int main(int argc, char **argv)
     set_callback();
 
     glClearColor(0, 0, 0, 0);
-    glEnable(GL_DEPTH_TEST);
     
     //Enable blok
     glEnable(GL_LINE_SMOOTH);
     glEnable(GL_BLEND);
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+
+    //Ukljucujemo blending
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
     glShadeModel(GL_SMOOTH);
 
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

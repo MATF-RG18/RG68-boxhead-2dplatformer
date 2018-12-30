@@ -13,5 +13,6 @@
 
 void setKeyboardFunc(void);
 void on_keyboard(unsigned char key, int x, int y);
+void on_release(unsigned char key, int x, int y);
 
 #endif

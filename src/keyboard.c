@@ -13,11 +13,13 @@
 void setKeyboardFunc(void)
 {
     glutKeyboardFunc(on_keyboard);
+    glutKeyboardUpFunc(on_release);
 }
 
 
 void on_keyboard(unsigned char key, int x, int y)
 {
+
     switch (key) {
     case ESCAPE:
         // Zavrsava se program.
@@ -27,26 +29,35 @@ void on_keyboard(unsigned char key, int x, int y)
         break;
     case 'd':
     case 'D':
-        //krecemo se na desnu stranu
-        if(canMoveThisWay('d'))
-        playerPosXLeft += playerStepForward;
+        pressed_d = true;
+       //Zelimo da se ogranicimo od mogucnosti da se ubrzano krece.
+       if((!indJump && !indFalling)|| wingsActive)
+         if(canMoveThisWay('d'))
+            playerPosXLeft += playerStepForward;
         break;
+    
     case 'a':
-    case 'A':
+    case 'A':        
+        pressed_a = true;    
         //krecemo se na levu stranu ako mozemo
-        if(canMoveThisWay('a'))
-            playerPosXLeft += playerStepBackwards;
+       
+       //Zelimo da se ogranicimo od mogucnosti da se ubrzano krece.
+       if((!indJump && !indFalling) || wingsActive)
+         if(canMoveThisWay('a'))
+             playerPosXLeft += playerStepBackwards;
+          
         break;
+    
     case 'w':
     case 'W':  
         //pokrecemo skok ako vec nije pokrenut
         if(!wingsActive)
        {
-	        if( indJump == false && indFalling == false)
+	        if(indJump == false && indFalling == false)
 	        {
 		        	if(playerStamina >= 30)
 		        {
-		        	playerStamina -= 30;
+		        	playerStamina -= 20;
 		            updatePlayerJumpHeight();
 		            indJump = true;
 		        }
@@ -55,7 +66,11 @@ void on_keyboard(unsigned char key, int x, int y)
         
         else
         {
-        	playerPosY += playerStepForward; //za sada koristim ovo ali svejedno je ime promenljive bitno je da je okej velicina :TODO
+            if( indJump == false && indFalling == false)
+                indJump = true;
+            
+               //Ako je pritisnuto dugme samo dugme 'w' onda idemo horizontalno
+               playerPosY += playerStepForward; //za sada koristim ovo ali svejedno je ime promenljive bitno je da je okej velicina :TODO
         }
         break;
     
@@ -76,8 +91,8 @@ void on_keyboard(unsigned char key, int x, int y)
     //       else
     //           cameraTilt = true;
     //       break; 
-    case 'r':
-    case 'R':
+    case 'p':
+    case 'P':
     	  //biramo da li zelimo 3D ili 2D
           if( cameraTilt == true)
           {
@@ -88,18 +103,47 @@ void on_keyboard(unsigned char key, int x, int y)
             cameraTilt = true;
           }
           break; 
-     
+     case 'r':
+     case 'R':
+           animation_ongoing = true;
+           playerPosXLeft = 0;
+           playerStamina = FULL;
+           RedPlaneParam = 0;
+           indJump = false;
+           indFalling = false;
+           wingsActive = false;
+           playerPosY = groundHeight[getPlayerCurrentTile()];
+          break;
      case SPACE:
      	   if(!wingsActive &&(playerStamina >= 30))
-     	   {	
+     	   {
+                //deaktiviramo skok jer ne zelimo da nam se nastavi kada iskljucimo krila
+            indJump = false;	
      	   		playerStamina -= 20;
      	    	wingsActive = true;
     	   }
     	   else if(wingsActive)
     	   {
+           pressed_a = false;
+           pressed_d = false;
     	   	 indFalling = true;
     	   	 wingsActive = false;
     	   }
     }
 }
 
+void on_release(unsigned char key, int x, int y)
+{
+    //Radimo switch za nasu dugmad
+    switch (key)
+    {
+        case 'a':
+        case 'A':   
+              pressed_d = false;
+              break;
+        case 'd':
+        case 'D':
+              pressed_a = false;
+              break;
+    }
+}

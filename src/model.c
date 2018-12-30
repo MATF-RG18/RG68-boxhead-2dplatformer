@@ -34,44 +34,9 @@ void drawStaminaBar()
 			glutSolidSphere(0.01,15,15);
 		glPopMatrix();
 	}
-
-	//Iscrtavamo pozadinu
-	
-	GLfloat diffuse[] = {0,0,0,1};
-	GLfloat ambient[] = {0.4,0.4,0.4,1};
-	glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse); 	
-	glMaterialfv(GL_FRONT, GL_AMBIENT, ambient);
-
-	glPushMatrix();
-		glTranslatef(0,0,0.2);
-		glTranslatef((100 *0.01 + playerPosXLeft - 1 + playerLength/2),1.5 + playerPosY  ,-0.1);
-		glScalef(5.5,0.4,0.003);
-		glutSolidCube(0.2);
-	glPopMatrix();
  }
 
-//Funkcija za iscrtavanje 2d modela igraca 
-void drawPlayerModel2D(void)
-{
-	setMaterial("player");
-   //Iscrtavamo igraca
-   playerPosXRight = playerPosXLeft + playerLength; // cuvamo srazmeru igraca 
-
-   
-   glColor3f(1, 0.5, 1);
-   glBegin(GL_POLYGON);
-      glVertex3f(playerPosXLeft, playerPosY, 0);
-      glVertex3f(playerPosXRight, playerPosY, 0);
-      glVertex3f(playerPosXRight, playerPosY + 0.1, 0);
-      glVertex3f(playerPosXLeft, playerPosY + 0.1, 0);
-      glEnd();
-   
-}
-
-
-
-//Funkcija za iscrtavanje 3d modela igraca
-void drawPlayerModel3D(float x, float y)
+void drawPlayerModel(float x, float y)
 {
 	setMaterial("player");
 
@@ -80,20 +45,21 @@ void drawPlayerModel3D(float x, float y)
 	glutSolidCube(playerLength);
 	glPopMatrix();
 
+
 	//ako su krila ukljucena iscrtacemo elisu helikoptera
 	if(wingsActive)
 	{
 
 		glPushMatrix();
-			glTranslatef(x, y + (float)playerLength, 0);
-			glRotatef(90 + 10*playerStamina,0,1,0);
+			glTranslatef(x, y + (float)playerLength + 0.01, 0);
+			glRotatef(90 + 30*playerStamina,0,1,0);
 			glScalef(0.3,0.02,0.01);
 			glutSolidSphere(1,30,30);
 		glPopMatrix();
 
 		glPushMatrix();
-			glTranslatef(x, y + (float)playerLength, 0);
-			glRotatef (10*playerStamina,0,1,0);
+			glTranslatef(x, y + (float)playerLength + 0.02, 0);
+			glRotatef (30*playerStamina,0,1,0);
 			glScalef(0.3,0.02,0.01);
 			glutSolidSphere(1,30,30);
 		glPopMatrix();
@@ -103,6 +69,7 @@ void drawPlayerModel3D(float x, float y)
 
 void drawGround2D()
 {
+  drawRedPlane();
 	setMaterial("ground");
    //Podesavamo prvobitnu plocu, i poziciju igraca u odnosu na nju 
    groundXCor[0] =  0;
@@ -117,7 +84,7 @@ void drawGround2D()
        if(groundIsSet[i] == false)
       {
        float visina;
-       visina =(float)rand()/(float)(RAND_MAX) * playerMaxJumpHeight * 1.7;
+       visina =(float)rand()/(float)(RAND_MAX) * playerMaxJumpHeight * 1.7 + 0.1;
        groundHeight[i] = visina;
        groundIsSet[i] = true;
       }
@@ -130,6 +97,19 @@ void drawGround2D()
    else
        groundXCor[i] = groundXCor[i-1] + groundLengthOfTile;
    
+   if(i%2 == 0 || i%5 == 0)
+      {
+      	drawTree2D(groundXCor[i], groundHeight[i], i);
+      	//Nakon iscrtavanja moramo opet da vratimo materijal na ground
+      }
+
+   drawHill(i, groundHeight[i]);
+   drawMoon();
+
+   setMaterial("ground");
+      
+   if(i%25 == 0)
+    setMaterial("special roof");
    glColor3f(0,1,1);
    glBegin(GL_POLYGON);
      glVertex3f(groundXCor[i], groundHeight[i], 0);
@@ -138,18 +118,22 @@ void drawGround2D()
      glVertex3f(groundXCor[i] + groundLengthOfTile, groundHeight[i], 0);  
    glEnd();
    }
+
+   // iscrtavamo jezera
+   drawLakes();
 }
 
    void drawGround3D(void)
     {
 
 
-    //Postavljamo materijal za zemlju.
-    setMaterial("ground");
+
+   //Iscrtavamo crvenu ravan
+   drawRedPlane();  
 
     	 //Podesavamo prvobitnu plocu, i poziciju igraca u odnosu na nju 
    groundXCor[0] =  0;
-   groundHeight[0] = 0;
+   groundHeight[0] = 0.2;
    playerCurrentTile = 0;
    groundIsSet[0] = true;   
 
@@ -171,21 +155,227 @@ void drawGround2D()
    for(i = 0; i < groundNumOfTiles; i++) 
    {
 
+
+   if(i % 25 == 0)
+    setMaterial("special roof");
+   else if(i % 2 == 0)
+   	setMaterial("roof1");
+   else if(i % 5 == 0)
+   	setMaterial("roof2");
+   else 
+   	setMaterial("roof3");
+
    if(i == 0)
        groundXCor[0] = 0;
    else
        groundXCor[i] = groundXCor[i-1] + groundLengthOfTile;
    
+   //Iscrtavamo zgrade
    glPushMatrix();
    glTranslatef((groundLengthOfTile/2 +  i * groundLengthOfTile),groundHeight[i]/2, 0);
    glScalef(groundLengthOfTile, groundHeight[i], 1);
    glutSolidCube(1);
-   glPopMatrix();   
+   glPopMatrix();
+
+   //Iscrtavamo teren ispod nasih ploca za kretanje
+   glPushMatrix();
+   glTranslatef((groundLengthOfTile/2 +  i * groundLengthOfTile),-0.75, 0);
+   glScalef(groundLengthOfTile, 1, 1);
+   glutSolidCube(1);
+   glPopMatrix();
+
+   glPushMatrix();
+   glTranslatef((groundLengthOfTile/2 +  i * groundLengthOfTile),-2, 0);
+   glScalef(groundLengthOfTile, 1, 1);
+   glutSolidCube(1);
+   glPopMatrix();
+
+    //Ovde mi odgovara ova boja zato nju biram;
+   setMaterial("neon");
+   
+      glPushMatrix();
+   glTranslatef((groundLengthOfTile/2 +  i * groundLengthOfTile),-2.5, 0);
+   glScalef(groundLengthOfTile, 5, 0.7);
+   glutSolidCube(1);
+   glPopMatrix();
+
+   //Iscrtavamo pozadinu
+   if(i != groundNumOfTiles - 5)
+   {
+
+   setMaterial("firstRowBackground");
+   glPushMatrix();
+	   glTranslatef((groundLengthOfTile/2 +  i * groundLengthOfTile),groundHeight[i+3]/2, -1);
+	   glScalef(groundLengthOfTile, groundHeight[i+3]+ 2, 1);
+	   glutSolidCube(1);
+	   glPopMatrix(); 
+
+
+   setMaterial("secondRowBackground");
+   glPushMatrix();
+	   glTranslatef((groundLengthOfTile/2 +  i * groundLengthOfTile),groundHeight[i+3]/2, -2);
+	   glScalef(groundLengthOfTile, groundHeight[i+5] + 3, 1);
+	   glutSolidCube(1);
+	   glPopMatrix();           
    }
 
+   glEnable(GL_CLIP_PLANE0);   
+   //Iscrtavamo odzake
+   if(i % 2 == 0)
+   {
+    if(i%10 == 0)
+      drawChimney(i, groundHeight[i], 2);
+    else if(i % 8 == 0)
+      drawChimney(i, groundHeight[i], 1);
+    else
+      drawChimney(i, groundHeight[i], 3);
+    glDisable(GL_CLIP_PLANE0);
+   
+    }
 
+ }
+}
+
+
+    void drawTree2D(float x, float y, int poz)
+    {
+    	
+    	 //promenljiva koja ce nam pomeriti malko iscrtavanje ispod y jer ne zelimo da vidimo prostor izmedju kada se renderuje
+    	float eps = 0.01;
+    	setMaterial("bark");
+    	//Isrtavamo stabla i krosnje od drveca
+    	glBegin(GL_QUADS);
+    		glVertex3f(x - 0.05 + groundLengthOfTile/2, y - eps, -0.01);
+    		glVertex3f(x - 0.05 + groundLengthOfTile/2, 0.4 + y - eps, -0.01);
+    		glVertex3f(x + 0.05 + groundLengthOfTile/2, 0.4 + y - eps, -0.01);
+    		glVertex3f(x + 0.05 + groundLengthOfTile/2, y - eps, -0.01);
+    	glEnd();
+
+
+    	setMaterial("leaf");
+    	glBegin(GL_TRIANGLES);
+		    glVertex3f(x - 0.2 + groundLengthOfTile/2, y + 0.4 - eps, -0.011);
+    		glVertex3f(x + 0.2 + groundLengthOfTile/2, 0.4 + y - eps, -0.011);
+    		glVertex3f(x + groundLengthOfTile/2, 0.8 + y - eps, -0.011);
+    	glEnd();
+
+    	glBegin(GL_TRIANGLES);
+		    glVertex3f(x - 0.2 + groundLengthOfTile/2, y + 0.4 +0.3 - eps, -0.012);
+    		glVertex3f(x + 0.2 + groundLengthOfTile/2, 0.4 + y +0.3 - eps, -0.012);
+    		glVertex3f(x + groundLengthOfTile/2, 0.8 + y +0.3 - eps, -0.02);
+    	glEnd();
+
+    	if(poz % 6 == 0)
+    	{
+    	setMaterial("leaf");
+    	glBegin(GL_TRIANGLES);
+		    glVertex3f(x - 0.2 + groundLengthOfTile/2, y + 0.4 + 0.6 - eps, -0.013);
+    		glVertex3f(x + 0.2 + groundLengthOfTile/2, 0.4 + y + 0.6 - eps, -0.013);
+    		glVertex3f(x + groundLengthOfTile/2, 0.8 + y + 0.6 - eps, -0.013);
+    	glEnd();
+    	}
     }
  
+void drawChimney(int poz, float height, int option)
+{
+	GLUquadric * cylinder1 = gluNewQuadric();
+	GLUquadric * cylinder2 = gluNewQuadric();
+  if(option == 1)
+  {
+  	glPushMatrix();
+  		glTranslatef(poz * groundLengthOfTile + groundLengthOfTile/2, height + 0.46, 0.4);
+  		glRotatef(90, 1, 0, 0);
+  		gluCylinder(cylinder1, 0.05, 0.05, poz%6* 3, 30, 30);
+  	glPopMatrix();
+  }
+	if(option == 2)
+	{
+  glPushMatrix();
+      glTranslatef(poz * groundLengthOfTile + groundLengthOfTile/2, height + 0.46, -0.4);
+      glRotatef(90, 1, 0, 0);
+      gluCylinder(cylinder1, 0.05, 0.05, poz%6* 3, 30, 30);
+  glPopMatrix();
+  
+	glPushMatrix();
+		glTranslatef(poz * groundLengthOfTile + groundLengthOfTile/2, height + 0.46, 0.4);
+		glRotatef(90, 1, 0, 0);
+		gluCylinder(cylinder2, 0.05, 0.05, poz%6* 3, 30, 30);
+	glPopMatrix();
+	}
+
+  if(option == 3)
+  {
+  glPushMatrix();
+    glTranslatef(poz * groundLengthOfTile + groundLengthOfTile/2, height + 0.46, -0.4);
+    glRotatef(90, 1, 0, 0);
+    gluCylinder(cylinder1, 0.05, 0.05, poz%6* 3, 30, 30);
+  glPopMatrix();
+  }
+
+}
+void drawMoon(void)
+{
+  setMaterial("moon");
+   glPushMatrix();
+      glScalef(2,2,1);
+      glTranslatef(playerPosXLeft/2 ,1,-2);
+      glutSolidSphere(0.15, 30,30);
+   glPopMatrix();
+   setMaterial("ground");
+  
+}
+
+void drawHill(int poz, float height)
+{
+  if(poz%2 == 0)
+  {
+    glPushMatrix();
+      glScalef(6,4,1);
+      glTranslatef(poz/10,-height + 0.25,-1);
+      glutSolidSphere(height, 30,30);
+    glPopMatrix();
+  }
 
 
+}
 
+
+void drawLakes(void)
+{
+  int i;
+ for(i = 2; i < groundNumOfTiles-1; i++) 
+ {
+    if(i%2 != 0 && i%5 != 0)
+    {
+      if(groundHeight[i]<groundHeight[i-1] && groundHeight[i] < groundHeight[i+1])
+      {
+        float min_height = groundHeight[i-1]<groundHeight[i+1] ? groundHeight[i-1] : groundHeight[i+1];
+        setMaterial("water");
+            glBegin(GL_QUADS);
+              glVertex3f(groundXCor[i]-0.01, groundHeight[i] - 0.03, 0);
+              glVertex3f(groundXCor[i]-0.01, min_height - 0.05, 0 );
+              glVertex3f(groundXCor[i+1]+0.01, min_height - 0.05, 0);
+              glVertex3f(groundXCor[i+1]+0.01, groundHeight[i] - 0.03, 0);
+            glEnd();
+        
+      }
+    }
+  }
+}
+
+
+void drawRedPlane(void)
+{
+
+  //Sada iscrtavam ravan koja nas "juri"
+    glPushMatrix();
+
+      //Iscrtavamo vidnu kliping ravan
+      setMaterial("Clipping plane");
+      glPushMatrix();
+       glScalef(1, 1, 1);
+       glTranslatef(RedPlaneParam - 1.5, playerPosY, 0);
+       glutSolidCube(3);
+
+      glPopMatrix();
+}

@@ -12,6 +12,7 @@ bool initGround()
     groundXCor = (float*)malloc( sizeof(float) * groundNumOfTiles);
     groundHeight = (float*)malloc( sizeof(float) * groundNumOfTiles);
     groundIsSet = (bool*)malloc( sizeof(bool) * groundNumOfTiles);
+
     if(groundXCor == NULL || groundHeight == NULL || groundIsSet == NULL){
         printf("greska pri alociranju memorije");
         fflush(stdin);
@@ -98,7 +99,7 @@ void generateMoreGround()
        if(groundIsSet[i] == false)
       {
        float visina;
-       visina = (float)rand() / (float)RAND_MAX ;
+       visina = (float)rand() / (float)RAND_MAX + 0.1 ;
        groundHeight[i] = visina; //Dodatno skracivanje
        
        groundIsSet[i] = true;
@@ -173,8 +174,8 @@ bool canMoveThisWay(unsigned char key)
 void setLighting()
 {	
 	//Podesavamo vektore
-	GLfloat position [] = {10,10,10,0};
-	GLfloat ambient  [] = {1,1,1,1};
+	GLfloat position [] = {10,10,10,1};
+	GLfloat ambient  [] = {0.4,0.4,0.4,1};
 	GLfloat diffuse  [] = {1,1,1,1};
 	GLfloat specular [] = {1,1,1,1};
 
@@ -193,12 +194,12 @@ void setMaterial(char * option)
 {
 	
 
-    if(strcmp("ground", option))
+    if(strcmp("ground", option) == 0)
     {
     	//Podesavamo vektore
 		GLfloat specular [] = {0,0,0,0};
-		GLfloat ambient  [] = {1,0,0,1};
-		GLfloat diffuse  [] = {1,0.4,0.4,1};
+		GLfloat ambient  [] = {0.105, 0.176, 0.086,1};
+		GLfloat diffuse  [] = {0.105, 0.176, 0.1,1};
     	int shininess   = 100;
 
 		//Inicijalizujemo osobine materijala
@@ -207,7 +208,128 @@ void setMaterial(char * option)
 		glMaterialfv(GL_FRONT, GL_SPECULAR, specular);
 		glMaterialf(GL_FRONT, GL_SHININESS, shininess);
 	}
-	else if(strcmp("player", option))
+	else if(strcmp("moon", option)==0)
+	{
+		//Podesavamo vektore
+		GLfloat specular [] = {0,0,0,0};
+		GLfloat ambient  [] = {0.909, 0.870, 0.552,1};
+		GLfloat diffuse  [] = {0.909, 0.870, 0.552,1};
+    	int shininess   = 100;
+
+		//Inicijalizujemo osobine materijala
+		glMaterialfv(GL_FRONT, GL_AMBIENT, ambient);
+		glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse);
+		glMaterialfv(GL_FRONT, GL_SPECULAR, specular);
+		glMaterialf(GL_FRONT, GL_SHININESS, shininess);
+	}
+
+	else if(strcmp("water", option)==0)
+	{
+		//Podesavamo vektore
+		GLfloat specular [] = {0,0,0,0};
+		GLfloat ambient  [] = {0.011, 0.207, 0.2,1};
+		GLfloat diffuse  [] = {0.011, 0.207, 0.2,1};
+    	int shininess   = 100;
+
+		//Inicijalizujemo osobine materijala
+		glMaterialfv(GL_FRONT, GL_AMBIENT, ambient);
+		glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse);
+		glMaterialfv(GL_FRONT, GL_SPECULAR, specular);
+		glMaterialf(GL_FRONT, GL_SHININESS, shininess);
+	}
+
+	else if(strcmp("Clipping plane", option) == 0)
+	{
+			//Podesavamo vektore
+		GLfloat specular [] = {1,1,1,0};
+		GLfloat ambient  [] = {0.890, 0.168, 0.168,0.3};
+		GLfloat diffuse  [] = {0.890, 0.168, 0.168,0.3};
+    	int shininess   = 1;
+
+		//Inicijalizujemo osobine materijala
+		glMaterialfv(GL_FRONT, GL_AMBIENT, ambient);
+		glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse);
+		glMaterialfv(GL_FRONT, GL_SPECULAR, specular);
+		glMaterialf(GL_FRONT, GL_SHININESS, shininess);
+	}
+
+	else if(strcmp("neon", option)==0)
+	{
+		//Podesavamo vektore
+		GLfloat specular [] = {0,0,0,0};
+		GLfloat ambient  [] = {0.039, 1, 0.968,1};
+		GLfloat diffuse  [] = {0.039, 1, 0.968,1};
+    	int shininess   = 100;
+
+		//Inicijalizujemo osobine materijala
+		glMaterialfv(GL_FRONT, GL_AMBIENT, ambient);
+		glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse);
+		glMaterialfv(GL_FRONT, GL_SPECULAR, specular);
+		glMaterialf(GL_FRONT, GL_SHININESS, shininess);
+	}
+
+
+	else if(strcmp("roof1", option)==0)
+	{
+		//Podesavamo vektore
+		GLfloat specular [] = {0,0,0,0};
+		GLfloat ambient  [] = {0.305, 0.431, 0.411,1};
+		GLfloat diffuse  [] = {0.301, 0.301, 0.301,1};
+    	int shininess   = 100;
+
+		//Inicijalizujemo osobine materijala
+		glMaterialfv(GL_FRONT, GL_AMBIENT, ambient);
+		glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse);
+		glMaterialfv(GL_FRONT, GL_SPECULAR, specular);
+		glMaterialf(GL_FRONT, GL_SHININESS, shininess);
+	}
+
+	else if(strcmp("roof2", option)==0)
+	{
+		//Podesavamo vektore
+		GLfloat specular [] = {0,0,0,0};
+		GLfloat ambient  [] = {0.205, 0.231, 0.211,1};
+		GLfloat diffuse  [] = {0.201, 0.201, 0.201,1};
+    	int shininess   = 100;
+
+		//Inicijalizujemo osobine materijala
+		glMaterialfv(GL_FRONT, GL_AMBIENT, ambient);
+		glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse);
+		glMaterialfv(GL_FRONT, GL_SPECULAR, specular);
+		glMaterialf(GL_FRONT, GL_SHININESS, shininess);
+	}
+
+	else if(strcmp("roof3", option)==0)
+	{
+		//Podesavamo vektore
+		GLfloat specular [] = {0,0,0,0};
+		GLfloat ambient  [] = {0.105, 0.131, 0.111,1};
+		GLfloat diffuse  [] = {0.101, 0.101, 0.201,1};
+    	int shininess   = 100;
+
+		//Inicijalizujemo osobine materijala
+		glMaterialfv(GL_FRONT, GL_AMBIENT, ambient);
+		glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse);
+		glMaterialfv(GL_FRONT, GL_SPECULAR, specular);
+		glMaterialf(GL_FRONT, GL_SHININESS, shininess);
+	}
+
+	else if(strcmp("special roof", option)==0)
+	{
+		//Podesavamo vektore
+		GLfloat specular [] = {0,0,0,0};
+		GLfloat ambient  [] = {0.933, 0.847, 0.325,1};
+		GLfloat diffuse  [] = {0.933, 0.847, 0.325,1};
+    	int shininess   = 100;
+
+		//Inicijalizujemo osobine materijala
+		glMaterialfv(GL_FRONT, GL_AMBIENT, ambient);
+		glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse);
+		glMaterialfv(GL_FRONT, GL_SPECULAR, specular);
+		glMaterialf(GL_FRONT, GL_SHININESS, shininess);
+	}
+
+	else if(strcmp("player", option)==0)
 	{
 		//Podesavamo vektore
 		GLfloat specular [] = {0,0,1,0};
@@ -222,12 +344,40 @@ void setMaterial(char * option)
 		glMaterialf(GL_FRONT, GL_SHININESS, shininess);	
 	}
 
-	else if(strcmp("stamina", option))
+	else if(strcmp("firstRowBackground", option) ==0)
+	{
+		GLfloat specular [] = {0,0,0,0};
+		GLfloat ambient  [] = {0.1, 0.1, 0.1,1};
+		GLfloat diffuse  [] = {0.160, 0.160, 0.166,1};
+	    int shininess   = 100;
+		
+		//Inicijalizujemo osobine materijala
+		glMaterialfv(GL_FRONT, GL_AMBIENT, ambient);
+		glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse);
+		glMaterialfv(GL_FRONT, GL_SPECULAR, specular);
+		glMaterialf(GL_FRONT, GL_SHININESS, shininess);
+	}
+
+	else if(strcmp("firstRowBackground", option) ==0)
+	{
+		GLfloat specular [] = {0.1,0.1,0.1,0};
+		GLfloat ambient  [] = {0.117, 0.121, 0.121,1};
+		GLfloat diffuse  [] = {0.117, 0.121, 0.121,1};
+	    int shininess   = 100;
+		
+		//Inicijalizujemo osobine materijala
+		glMaterialfv(GL_FRONT, GL_AMBIENT, ambient);
+		glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse);
+		glMaterialfv(GL_FRONT, GL_SPECULAR, specular);
+		glMaterialf(GL_FRONT, GL_SHININESS, shininess);
+	}
+
+	else if(strcmp("stamina", option)==0)
 	{
 			//Podesavamo vektore
-		GLfloat specular [] = {1,1,1,0};
-		GLfloat ambient  [] = {1,1,0,1};
-		GLfloat diffuse  [] = {0.4,0.4,1,1};
+		GLfloat specular [] = {0.3,0.3,0.3,0};
+		GLfloat ambient  [] = {0.3, 0.3,0,1};
+		GLfloat diffuse  [] = {0.2,0.2,0.2,1};
 	    int shininess   = 3;
 		
 		//Inicijalizujemo osobine materijala
@@ -237,6 +387,36 @@ void setMaterial(char * option)
 		glMaterialf(GL_FRONT, GL_SHININESS, shininess);	
 	}
 
+	else if(strcmp("leaf", option)==0)
+	{
+		//Podesavamo vektore
+		GLfloat specular [] = {0,1,1,1};
+		GLfloat ambient  [] = {0.3,1,0.3,1};
+		GLfloat diffuse  [] = {0.4,0.1,0.4,1};
+	    int shininess   = 100;
+		
+		//Inicijalizujemo osobine materijala
+		glMaterialfv(GL_FRONT, GL_AMBIENT, ambient);
+		glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse);
+		glMaterialfv(GL_FRONT, GL_SPECULAR, specular);
+		glMaterialf(GL_FRONT, GL_SHININESS, shininess);
+
+	}
+
+	else if(strcmp("bark", option)==0)
+	{
+		//Podesavamo vektore
+		GLfloat specular [] = {0,0,0,1};
+		GLfloat ambient  [] = {0.588, 0.349, 0.211,1};
+		GLfloat diffuse  [] = {0.588, 0.349, 0.211,1};
+	    int shininess   = 100;
+		
+		//Inicijalizujemo osobine materijala
+		glMaterialfv(GL_FRONT, GL_AMBIENT, ambient);
+		glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse);
+		glMaterialfv(GL_FRONT, GL_SPECULAR, specular);
+		glMaterialf(GL_FRONT, GL_SHININESS, shininess);
+	}
 }
 
 
