@@ -99,7 +99,14 @@ void generateMoreGround()
        if(groundIsSet[i] == false)
       {
        float visina;
-       visina = (float)rand() / (float)RAND_MAX + 0.1 ;
+       visina = (float)rand() / (float)RAND_MAX + 0.2 ;
+       
+       //Cisto ogranicenje za visinu
+       if (visina > 3)
+       	 visina = 3;
+       if (visina < 0.6)
+       	 visina = 0.6;
+
        groundHeight[i] = visina; //Dodatno skracivanje
        
        groundIsSet[i] = true;
@@ -449,3 +456,4 @@ void drawAxis(bool do_it)
     }
 
 }
+

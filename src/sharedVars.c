@@ -16,6 +16,8 @@ bool wingsActive= false;
 int playerStamina = 100;
 float staminaIncrement = 0;
 
+bool just_started = true;
+
 
 //promenljive koje cuvaju poziciju igraca
  float playerPosXLeft = 1.25;
@@ -27,7 +29,7 @@ float staminaIncrement = 0;
  float playerStepForward = 0.020;
 
  //Parametar za x osu crvene ravni
- float RedPlaneParam = 1.1;
+ float RedPlaneParam = 0;
 
  //animation parametar
  bool animation_ongoing = true;
@@ -67,3 +69,12 @@ float staminaIncrement = 0;
  bool pressed_a = false;
  bool pressed_d = false;
 
+ //fullscreen
+ bool fullscreen = true;
+
+
+//Da li je igra restartovana
+bool has_been_restarted = false;
+
+ //Score
+ int score = 0;

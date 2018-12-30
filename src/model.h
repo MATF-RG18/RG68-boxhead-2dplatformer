@@ -31,4 +31,9 @@ void drawLakes(void);
 //Iscrtavanje kliping ravni od koje bezimo.
 void drawRedPlane(void);
 
+
+//Ispisivanje score counter-a
+void writeScore(char *string,float x,float y,float z); 
+
+
 #endif

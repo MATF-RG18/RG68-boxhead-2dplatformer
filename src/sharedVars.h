@@ -41,6 +41,9 @@ extern bool cameraTilt; //Da li je ili nije kamera malko nagnuta po x osi
 extern float cameraOffsetX;
 extern float cameraOffsetY;
 
+//Kada tek krecemo koristimo ovo
+extern bool just_started;
+
 extern float groundLevel; //nivo terena, za sada je to 0 odnosno x osa
 
 extern float dnFPS; //koristimo ga u on_timer pozivu za kontrolu frejmova po sekundi
@@ -65,5 +68,14 @@ extern int groundReallocStep;
 //bool promenljive za kretanje
 extern bool pressed_a;
 extern bool pressed_d;
+
+//fullscreen
+extern bool fullscreen;
+
+//Da li je igra restartovana
+extern bool has_been_restarted;
+
+//Score
+extern int score;
 
 #endif

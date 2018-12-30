@@ -81,20 +81,33 @@ void on_display(void)
 void on_timer(int value)
 {  
 
+
+
   //Racunamo trenutne dozvole igraca
-    playerCurrentTile = getPlayerCurrentTile(); 
+    playerCurrentTile = getPlayerCurrentTile();
 
-  //Popravlja jedan deo bug-a da mi pola kockice igraca bude u zidu.
-  if((playerPosXRight >= groundXCor[playerCurrentTile] + groundLengthOfTile) && 
-      abs(groundHeight[playerCurrentTile + 1] - groundHeight[playerCurrentTile]) > playerLength/3)
-   {
-      playerPosXLeft = groundXCor[playerCurrentTile] + groundLengthOfTile - playerLength;
-   }
 
-  //Popravlja drugi deo bug-a;
-  if(playerPosXLeft > (groundXCor[playerCurrentTile] + groundLengthOfTile) && playerPosY < groundHeight[playerCurrentTile+1])
-    playerPosXLeft = groundXCor[playerCurrentTile] + groundLengthOfTile - playerLength;  
+  // Otklanja bag koji se nekada pojavi gde se igrac stvori unutar kocke.
+  if(just_started)
+  {
+    playerPosY = groundHeight[playerCurrentTile];
+    just_started = false;
+  }
 
+  if(playerCurrentTile - 2 > score)
+    score = playerCurrentTile-2; 
+
+
+  int pomocnaX = floor(playerPosXRight/ groundLengthOfTile);
+  if((playerCurrentTile != pomocnaX) && (groundHeight[pomocnaX] > (groundHeight[playerCurrentTile] + playerLength/3)))
+    playerPosXLeft = groundXCor[playerCurrentTile] + groundLengthOfTile - playerLength;        
+
+
+  if(has_been_restarted)
+  {
+    //Samo pokrecemo opet animaciju ako smo restartovali igru
+    animation_ongoing = true;
+  }
   
 
   if(playerCurrentTile % 25 == 0 && playerPosY <= groundHeight[playerCurrentTile])
@@ -169,11 +182,6 @@ void on_timer(int value)
 
     if(groundIsSet[playerCurrentTile] == true)
       groundLevel = groundHeight[playerCurrentTile];
-    else
-      {
-      printf("\nGROUND LEVEL NOT SET TILE NO.: %d\t", playerCurrentTile);
-      exit(EXIT_FAILURE);
-      }
     
     //ovo se menja pritiskom na dugme c
     if(cameraTilt)
@@ -262,12 +270,11 @@ void on_timer(int value)
 		        indFalling  = false;
 		    }
 	}
-	
-
-
+	}
+  
     glutPostRedisplay(); //nanovo ucitavamo prozor u odredjenim intervalima
     glutTimerFunc(1000/dnFPS, on_timer, 0); //podesili smo funkciju on_timer da sama sebe poziva  
-  }
+  
 }
 
 

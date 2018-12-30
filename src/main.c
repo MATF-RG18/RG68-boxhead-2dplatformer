@@ -37,8 +37,8 @@ int main(int argc, char **argv)
 
     glShadeModel(GL_SMOOTH);
 
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-   
+    //Na pocetku je u fullscreen-u
+    glutFullScreen();
 
     setLighting();
 

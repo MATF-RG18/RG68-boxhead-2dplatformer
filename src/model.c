@@ -69,6 +69,11 @@ void drawPlayerModel(float x, float y)
 
 void drawGround2D()
 {
+
+  //Ispisujemo score
+  writeScore("Score!", playerPosXLeft + playerLength/2, playerPosY + 1, 1);
+
+  //Iscrtavamo red plane 
   drawRedPlane();
 	setMaterial("ground");
    //Podesavamo prvobitnu plocu, i poziciju igraca u odnosu na nju 
@@ -79,6 +84,7 @@ void drawGround2D()
 
    srand(time(NULL));
    int i;
+
    for(i= 1; i < groundNumOfTiles; i++)
    {
        if(groundIsSet[i] == false)
@@ -103,12 +109,14 @@ void drawGround2D()
       	//Nakon iscrtavanja moramo opet da vratimo materijal na ground
       }
 
-   drawHill(i, groundHeight[i]);
-   drawMoon();
-
+ if(groundXCor[i] > RedPlaneParam - 5)
+  {
+    drawHill(i, groundHeight[i]);
+    drawMoon();
+  }
    setMaterial("ground");
       
-   if(i%25 == 0)
+  if(i%25 == 0)
     setMaterial("special roof");
    glColor3f(0,1,1);
    glBegin(GL_POLYGON);
@@ -117,6 +125,7 @@ void drawGround2D()
      glVertex3f(groundXCor[i] + groundLengthOfTile,  groundDepth, 0);
      glVertex3f(groundXCor[i] + groundLengthOfTile, groundHeight[i], 0);  
    glEnd();
+   
    }
 
    // iscrtavamo jezera
@@ -127,11 +136,13 @@ void drawGround2D()
     {
 
 
+   //Ispisujemo score dosadasnji
+   writeScore("SCORE!",playerPosXLeft,playerPosY+1,1); 
 
    //Iscrtavamo crvenu ravan
    drawRedPlane();  
 
-    	 //Podesavamo prvobitnu plocu, i poziciju igraca u odnosu na nju 
+   //Podesavamo prvobitnu plocu, i poziciju igraca u odnosu na nju 
    groundXCor[0] =  0;
    groundHeight[0] = 0.2;
    playerCurrentTile = 0;
@@ -378,4 +389,37 @@ void drawRedPlane(void)
        glutSolidCube(3);
 
       glPopMatrix();
+}
+
+
+void writeScore(char *string,float x,float y,float z) 
+{  
+    char *c;
+
+    glLineWidth(3);
+    // sprintf(string, "%d!", score);
+    asprintf (&string, "%i!", score);
+
+    glPushMatrix();
+    
+
+    if(score < 10)
+      glTranslatef(playerPosXLeft - 0.5 + playerLength + 0.4, 1.3 + playerPosY,0.2);
+    else if(score < 100) 
+      glTranslatef(playerPosXLeft - 0.5 + playerLength + 0.3, 1.3 + playerPosY,0.2);
+    else  
+      glTranslatef(playerPosXLeft - 0.5 + playerLength + 0.3, 1.3 + playerPosY,0.2);
+
+
+    glScalef(0.0015,0.0015,0.001);
+    
+    glLineWidth(2);
+
+    for (c=string; *c != '!'; c++)
+      {
+          //ovde mi bas odgovara ovaj materijal pa ga opet koristim
+          setMaterial("special roof");
+          glutStrokeCharacter(GLUT_STROKE_MONO_ROMAN , *c);
+      }
+  glPopMatrix();
 }
