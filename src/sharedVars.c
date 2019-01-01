@@ -74,7 +74,7 @@ bool just_started = true;
 
 
 //Da li je igra restartovana
-bool has_been_restarted = true;
+bool has_been_restarted = false;
 
  //Score
  int score = 0;
